@@ -1,0 +1,41 @@
+@startuml image
+title Remote Camera By MQTT(over Internet)
+cloud AWS{
+    card S3{
+        component "WebPage\n(with JavaScript)" as WebPage
+    }
+    card IoTCore{
+        component MQTTMsgBroker
+    }
+}
+node Outside{
+    actor me
+    card Mobile{
+        card WebBrowser{
+            component "Paho on\nJavaScript" as JsPaho
+        }
+    }
+}
+node Home{
+    card miniCar{
+        card RaspberryPi{
+            component "Paho on\nPython" as PythonPaho
+            card GPIO
+            card USB
+        }
+        card ServoMotor
+        card Camera
+    }
+}
+WebBrowser<-up-WebPage:View\nDownload
+JsPaho-up->MQTTMsgBroker:<font color=blue>Control\n(Pub)
+JsPaho<-up-MQTTMsgBroker:<font color=red>MJpeg\n(Sub) 
+PythonPaho<-up-MQTTMsgBroker:<font color=blue>Control\n(Sub)
+PythonPaho-up->MQTTMsgBroker:<font color=red>MJpeg\n(Pub)
+PythonPaho-->GPIO:<font color=blue>lib.pigpio
+PythonPaho<--USB:<font color=red>lib.opencv
+PythonPaho->PythonPaho:<font color=red>face congnition\n(lib.opencv)
+GPIO-->ServoMotor:<font color=blue>Camera Control
+ServoMotor->Camera:<font color=blue>Control
+USB<--Camera:<font color=red>Capture
+@enduml
